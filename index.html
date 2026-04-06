@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Registro de pensamientos</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pensamientos">
+<meta name="theme-color" content="#2D5A4F">
+<link rel="manifest" id="manifest-placeholder">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -545,6 +550,34 @@ function renderHistorial() {
       </div>` : '<div style="font-size:12px;color:var(--text3);margin-top:8px;font-style:italic;">Respuesta racional pendiente</div>'}
     </div>
   `).join('');
+}
+</script>
+<script>
+const manifest = {
+  name: 'Registro de pensamientos',
+  short_name: 'Pensamientos',
+  start_url: './',
+  display: 'standalone',
+  background_color: '#F7F5F0',
+  theme_color: '#2D5A4F',
+  icons: [{
+    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%232D5A4F'/><text x='256' y='360' text-anchor='middle' font-size='320' fill='white'>✍</text></svg>",
+    sizes: '512x512',
+    type: 'image/svg+xml'
+  }]
+};
+const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+document.getElementById('manifest-placeholder').href = URL.createObjectURL(blob);
+
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'rp-v1';
+    const ASSETS = [self.location.pathname];
+    self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))));
+    self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+  `;
+  const swBlob = new Blob([swCode], {type: 'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
 }
 </script>
 </body>
