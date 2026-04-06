@@ -417,6 +417,8 @@
     <div class="stat"><span class="stat-num" id="stat-avg">—</span><div class="stat-label">intensidad media</div></div>
     <div class="stat"><span class="stat-num" id="stat-complete">0</span><div class="stat-label">con respuesta</div></div>
   </div>
+  <button class="btn-export" id="btn-export" onclick="exportar()" style="display:none;width:100%;padding:12px;margin:8px 0 12px;background:transparent;border:0.5px solid var(--accent);border-radius:var(--radius);font-family:DM Sans,sans-serif;font-size:14px;color:var(--accent);cursor:pointer;">Copiar registros para compartir</button>
+  <div id="export-confirm" style="display:none;text-align:center;font-size:13px;color:var(--accent);padding:4px 0 8px;">Copiado al portapapeles &#10003;</div>
   <div id="lista"></div>
 </div>
 
@@ -516,15 +518,32 @@ function renderEmotionTags(entry) {
   ).join('');
 }
 
+function exportar() {
+  const texto = [...entries].reverse().map((e, i) => {
+    const emociones = (e.emociones || [e.emocion]).join(', ');
+    let bloque = `--- Registro ${i+1} · ${e.fecha} ${e.hora} ---\nEmoción: ${emociones} (${e.intensidad}/10)\nPensamiento: ${e.pensamiento}`;
+    if (e.racional) bloque += `\nRespuesta racional: ${e.racional}`;
+    return bloque;
+  }).join('\n\n');
+  navigator.clipboard.writeText(texto).then(() => {
+    const conf = document.getElementById('export-confirm');
+    conf.style.display = 'block';
+    setTimeout(() => { conf.style.display = 'none'; }, 2500);
+  });
+}
+
 function renderHistorial() {
   const el = document.getElementById('lista');
   const sb = document.getElementById('stats-bar');
+  const btnExp = document.getElementById('btn-export');
   if (!entries.length) {
     sb.style.display = 'none';
+    if (btnExp) btnExp.style.display = 'none';
     el.innerHTML = '<div class="empty"><span>◦</span>Aún no hay registros.<br>Añade el primero cuando lo necesites.</div>';
     return;
   }
   sb.style.display = 'flex';
+  if (btnExp) btnExp.style.display = 'block';
   const avg = (entries.reduce((s,e) => s + e.intensidad, 0) / entries.length).toFixed(1);
   const complete = entries.filter(e => e.racional).length;
   document.getElementById('stat-total').textContent = entries.length;
