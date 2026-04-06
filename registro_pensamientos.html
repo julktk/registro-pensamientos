@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Registro de pensamientos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --text: #1C1A17;
+    --text2: #6B6560;
+    --text3: #A09A93;
+    --border: rgba(28,26,23,0.1);
+    --border2: rgba(28,26,23,0.18);
+    --accent: #2D5A4F;
+    --accent-light: #E8F0EE;
+    --tristeza: #3B5B8C;
+    --ansiedad: #7A4F8C;
+    --ira: #B84C2E;
+    --culpa: #8C6E2E;
+    --verguenza: #C4507A;
+    --miedo: #4A7A6E;
+    --frustracion: #8C5C2E;
+    --soledad: #5C6E8C;
+    --otra: #6B6560;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 100px;
+  }
+  header {
+    padding: 2rem 1.5rem 1rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  header p {
+    font-size: 13px;
+    color: var(--text3);
+    margin-top: 4px;
+    font-weight: 300;
+  }
+  .tabs {
+    display: flex;
+    padding: 1rem 1.5rem 0;
+    gap: 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 0;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .tab.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+    font-weight: 500;
+  }
+  .section { display: none; padding: 1.5rem; }
+  .section.active { display: block; }
+
+  .field { margin-bottom: 1.25rem; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+  textarea {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.6;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    background: var(--surface);
+    color: var(--text);
+    resize: none;
+    min-height: 90px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--text3); font-weight: 300; }
+
+  .emotion-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .emotion-btn {
+    padding: 10px 6px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .emotion-btn.selected {
+    color: white;
+    border-color: transparent;
+    font-weight: 500;
+  }
+  .emotion-btn[data-e="Tristeza"].selected { background: var(--tristeza); }
+  .emotion-btn[data-e="Ansiedad"].selected { background: var(--ansiedad); }
+  .emotion-btn[data-e="Ira"].selected { background: var(--ira); }
+  .emotion-btn[data-e="Culpa"].selected { background: var(--culpa); }
+  .emotion-btn[data-e="Vergüenza"].selected { background: var(--verguenza); }
+  .emotion-btn[data-e="Miedo"].selected { background: var(--miedo); }
+  .emotion-btn[data-e="Frustración"].selected { background: var(--frustracion); }
+  .emotion-btn[data-e="Soledad"].selected { background: var(--soledad); }
+  .emotion-btn[data-e="Otra"].selected { background: var(--otra); }
+  .emotion-custom-wrap {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .emotion-custom-wrap input {
+    flex: 1;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .emotion-custom-wrap input:focus { border-color: var(--accent); }
+  .emotion-custom-wrap input::placeholder { color: var(--text3); }
+  .emotion-add-btn {
+    padding: 9px 14px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .emotion-add-btn:active { opacity: 0.7; }
+
+  .intensity-wrap {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+  }
+  .intensity-row { display: flex; align-items: center; gap: 12px; }
+  .intensity-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--accent);
+    min-width: 32px;
+    text-align: right;
+  }
+  input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 3px;
+    background: var(--border2);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .intensity-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 8px;
+  }
+
+  .btn-save {
+    width: 100%;
+    padding: 15px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+  .btn-save:active { transform: scale(0.98); opacity: 0.9; }
+
+  .note {
+    background: var(--accent-light);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--accent);
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text3);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+  .empty span {
+    display: block;
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    margin-bottom: 12px;
+    opacity: 0.3;
+  }
+
+  .entry {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 12px;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  .entry-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .entry-meta { display: flex; flex-direction: column; gap: 4px; }
+  .entry-date { font-size: 12px; color: var(--text3); }
+  .emotion-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    color: white;
+  }
+  .entry-delete {
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    margin-left: 8px;
+    flex-shrink: 0;
+  }
+  .entry-field { margin-bottom: 10px; }
+  .entry-field:last-child { margin-bottom: 0; }
+  .entry-field-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 4px;
+  }
+  .entry-field-value {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .entry-rational {
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+    margin-top: 10px;
+  }
+
+  .stats-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+  .stat {
+    flex: 1;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--accent);
+    display: block;
+  }
+  .stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Registro de pensamientos</h1>
+  <p>Método de las tres columnas · David Burns</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('nuevo')">Nuevo</button>
+  <button class="tab" onclick="showTab('historial')">Historial</button>
+</div>
+
+<div class="section active" id="tab-nuevo">
+  <div class="note">
+    Anota el pensamiento en el momento. La tercera columna puedes rellenarla después, con calma.
+  </div>
+
+  <div class="field">
+    <label>1 · Situación o pensamiento automático</label>
+    <textarea id="pensamiento" placeholder="¿Qué ha pasado? ¿Qué pensamiento ha aparecido?" rows="4"></textarea>
+  </div>
+
+  <div class="field">
+    <label>2 · Emoción <span style="font-weight:300;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text3)">(puedes seleccionar varias)</span></label>
+    <div class="emotion-grid" id="emotion-grid">
+      <button class="emotion-btn" data-e="Tristeza" onclick="toggleEmotion(this)">Tristeza</button>
+      <button class="emotion-btn" data-e="Ansiedad" onclick="toggleEmotion(this)">Ansiedad</button>
+      <button class="emotion-btn" data-e="Ira" onclick="toggleEmotion(this)">Ira</button>
+      <button class="emotion-btn" data-e="Culpa" onclick="toggleEmotion(this)">Culpa</button>
+      <button class="emotion-btn" data-e="Vergüenza" onclick="toggleEmotion(this)">Vergüenza</button>
+      <button class="emotion-btn" data-e="Miedo" onclick="toggleEmotion(this)">Miedo</button>
+      <button class="emotion-btn" data-e="Frustración" onclick="toggleEmotion(this)">Frustración</button>
+      <button class="emotion-btn" data-e="Soledad" onclick="toggleEmotion(this)">Soledad</button>
+    </div>
+    <div class="emotion-custom-wrap">
+      <input type="text" id="custom-emotion" placeholder="Otra emoción..." maxlength="30">
+      <button class="emotion-add-btn" onclick="addCustomEmotion()">+ Añadir</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Intensidad</label>
+    <div class="intensity-wrap">
+      <div class="intensity-row">
+        <input type="range" min="1" max="10" value="5" step="1" id="intensidad"
+          oninput="document.getElementById('intval').textContent=this.value">
+        <span class="intensity-num" id="intval">5</span>
+      </div>
+      <div class="intensity-labels"><span>leve</span><span>moderada</span><span>intensa</span></div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>3 · Respuesta racional <span style="font-weight:300;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text3)">(opcional — puedes añadirla después)</span></label>
+    <textarea id="racional" placeholder="¿Hay una versión más equilibrada y realista de ese pensamiento?" rows="4"></textarea>
+  </div>
+
+  <button class="btn-save" onclick="guardar()">Guardar registro</button>
+</div>
+
+<div class="section" id="tab-historial">
+  <div class="stats-bar" id="stats-bar" style="display:none">
+    <div class="stat"><span class="stat-num" id="stat-total">0</span><div class="stat-label">registros</div></div>
+    <div class="stat"><span class="stat-num" id="stat-avg">—</span><div class="stat-label">intensidad media</div></div>
+    <div class="stat"><span class="stat-num" id="stat-complete">0</span><div class="stat-label">con respuesta</div></div>
+  </div>
+  <div id="lista"></div>
+</div>
+
+<script>
+const COLORS = {
+  'Tristeza': '#3B5B8C', 'Ansiedad': '#7A4F8C', 'Ira': '#B84C2E',
+  'Culpa': '#8C6E2E', 'Vergüenza': '#C4507A', 'Miedo': '#4A7A6E',
+  'Frustración': '#8C5C2E', 'Soledad': '#5C6E8C'
+};
+const DEFAULT_COLOR = '#6B6560';
+
+let selectedEmotions = new Set();
+let entries = JSON.parse(localStorage.getItem('rp_entries') || '[]');
+
+function getColor(e) { return COLORS[e] || DEFAULT_COLOR; }
+
+function toggleEmotion(btn) {
+  const e = btn.dataset.e;
+  if (selectedEmotions.has(e)) {
+    selectedEmotions.delete(e);
+    btn.classList.remove('selected');
+  } else {
+    selectedEmotions.add(e);
+    btn.classList.add('selected');
+  }
+}
+
+function addCustomEmotion() {
+  const input = document.getElementById('custom-emotion');
+  const val = input.value.trim();
+  if (!val) return;
+  const grid = document.getElementById('emotion-grid');
+  if ([...grid.querySelectorAll('.emotion-btn')].some(b => b.dataset.e.toLowerCase() === val.toLowerCase())) {
+    input.value = '';
+    return;
+  }
+  const btn = document.createElement('button');
+  btn.className = 'emotion-btn';
+  btn.dataset.e = val;
+  btn.textContent = val;
+  btn.onclick = function() { toggleEmotion(this); };
+  grid.appendChild(btn);
+  selectedEmotions.add(val);
+  btn.classList.add('selected');
+  btn.style.background = DEFAULT_COLOR;
+  btn.style.color = 'white';
+  btn.style.borderColor = 'transparent';
+  input.value = '';
+}
+
+function showTab(t) {
+  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', (i===0&&t==='nuevo')||(i===1&&t==='historial')));
+  document.querySelectorAll('.section').forEach((s,i) => s.classList.toggle('active', (i===0&&t==='nuevo')||(i===1&&t==='historial')));
+  if (t === 'historial') renderHistorial();
+}
+
+function guardar() {
+  const p = document.getElementById('pensamiento').value.trim();
+  const r = document.getElementById('racional').value.trim();
+  const i = parseInt(document.getElementById('intensidad').value);
+  if (!p) { alert('Escribe el pensamiento o situación antes de guardar.'); return; }
+  if (!selectedEmotions.size) { alert('Selecciona al menos una emoción.'); return; }
+  const now = new Date();
+  entries.unshift({
+    pensamiento: p,
+    emociones: [...selectedEmotions],
+    intensidad: i,
+    racional: r,
+    fecha: now.toLocaleDateString('es-ES', {weekday:'short', day:'numeric', month:'short'}),
+    hora: now.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'}),
+    id: Date.now()
+  });
+  localStorage.setItem('rp_entries', JSON.stringify(entries));
+  document.getElementById('pensamiento').value = '';
+  document.getElementById('racional').value = '';
+  document.getElementById('intensidad').value = 5;
+  document.getElementById('intval').textContent = '5';
+  document.querySelectorAll('.emotion-btn').forEach(b => {
+    b.classList.remove('selected');
+    if (!COLORS[b.dataset.e]) { b.remove(); }
+  });
+  selectedEmotions.clear();
+  showTab('historial');
+}
+
+function borrar(id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  entries = entries.filter(e => e.id !== id);
+  localStorage.setItem('rp_entries', JSON.stringify(entries));
+  renderHistorial();
+}
+
+function renderEmotionTags(entry) {
+  const emociones = entry.emociones || (entry.emocion ? [entry.emocion] : []);
+  return emociones.map(e =>
+    `<span class="emotion-tag" style="background:${getColor(e)}">${e}</span>`
+  ).join('');
+}
+
+function renderHistorial() {
+  const el = document.getElementById('lista');
+  const sb = document.getElementById('stats-bar');
+  if (!entries.length) {
+    sb.style.display = 'none';
+    el.innerHTML = '<div class="empty"><span>◦</span>Aún no hay registros.<br>Añade el primero cuando lo necesites.</div>';
+    return;
+  }
+  sb.style.display = 'flex';
+  const avg = (entries.reduce((s,e) => s + e.intensidad, 0) / entries.length).toFixed(1);
+  const complete = entries.filter(e => e.racional).length;
+  document.getElementById('stat-total').textContent = entries.length;
+  document.getElementById('stat-avg').textContent = avg;
+  document.getElementById('stat-complete').textContent = complete;
+
+  el.innerHTML = entries.map(e => `
+    <div class="entry">
+      <div class="entry-top">
+        <div class="entry-meta">
+          <span class="entry-date">${e.fecha} · ${e.hora} · ${e.intensidad}/10</span>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${renderEmotionTags(e)}</div>
+        </div>
+        <button class="entry-delete" onclick="borrar(${e.id})">×</button>
+      </div>
+      <div class="entry-field">
+        <div class="entry-field-label">Pensamiento automático</div>
+        <div class="entry-field-value">${e.pensamiento.replace(/</g,'&lt;')}</div>
+      </div>
+      ${e.racional ? `<div class="entry-field entry-rational">
+        <div class="entry-field-label">Respuesta racional</div>
+        <div class="entry-field-value">${e.racional.replace(/</g,'&lt;')}</div>
+      </div>` : '<div style="font-size:12px;color:var(--text3);margin-top:8px;font-style:italic;">Respuesta racional pendiente</div>'}
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>
